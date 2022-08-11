@@ -19,11 +19,14 @@ import java.util.concurrent.Callable;
  * SystemCommandTasklet -> dir 이 안먹는다
  * */
 @Slf4j
-@Configuration
+//@Configuration
 public class SimpleJobConfig001 {
     @Autowired
     BatchBuilderContainer batchBuilderContainer;
 
+    /**
+     * Callable job
+     */
 //    @Bean
     public Job callableJob() {
         return batchBuilderContainer.getJobBuilderFactory()
@@ -53,24 +56,27 @@ public class SimpleJobConfig001 {
     }
 
 
-//    @Bean
-    public Job methodInvokeJob() {
+    /**
+     * Method Invoke Job
+     */
+    @Bean
+    public Job methodInvokeJob(CustomService customService) {
         return batchBuilderContainer.getJobBuilderFactory()
                 .get("methodInvokeJob")
-                .start(methodInvokeStep())
+                .start(methodInvokeStep(customService))
                 .build();
     }
     @Bean
-    public Step methodInvokeStep() {
+    public Step methodInvokeStep(CustomService customService) {
         return batchBuilderContainer.getStepBuilderFactory()
                 .get("methodInvokeStep")
-                .tasklet(methodInvokingTasklet())
+                .tasklet(methodInvokingTasklet(customService))
                 .build();
     }
     @Bean
-    public MethodInvokingTaskletAdapter methodInvokingTasklet() {
+    public MethodInvokingTaskletAdapter methodInvokingTasklet(CustomService customService) {
         MethodInvokingTaskletAdapter methodInvokingTaskletAdapter = new MethodInvokingTaskletAdapter();
-        methodInvokingTaskletAdapter.setTargetObject(customService());
+        methodInvokingTaskletAdapter.setTargetObject(customService);
         methodInvokingTaskletAdapter.setTargetMethod("service");
         return methodInvokingTaskletAdapter;
     }
@@ -86,6 +92,10 @@ public class SimpleJobConfig001 {
     }
 
 
+    /**
+     * System Command Job
+     * 근데 잘안된다.
+     */
 //    @Bean
     public Job systemCommandJob() {
         return batchBuilderContainer.getJobBuilderFactory()
@@ -100,9 +110,7 @@ public class SimpleJobConfig001 {
                 .tasklet(systemCommandTasklet())
                 .build();
     }
-    /**
-     * 음.. dir 이라는 파일을 찾을 수 없다고 나온다. 왜이럴까?
-     * */
+    //음.. dir 이라는 파일을 찾을 수 없다고 나온다. 왜이럴까?
     @Bean
     public SystemCommandTasklet systemCommandTasklet() {
         SystemCommandTasklet systemCommandTasklet = new SystemCommandTasklet();

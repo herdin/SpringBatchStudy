@@ -6,6 +6,7 @@ import org.springframework.batch.core.*;
 import org.springframework.batch.core.annotation.AfterJob;
 import org.springframework.batch.core.annotation.BeforeJob;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.listener.JobListenerFactoryBean;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -23,7 +24,7 @@ import java.util.Date;
  * incrementer
  * validator
  * */
-@Configuration
+//@Configuration
 @Slf4j
 public class SimpleJobConfig002 {
 
@@ -37,6 +38,9 @@ public class SimpleJobConfig002 {
      * 말그대로 scope 의 생명주기와 관련이 있는듯하다.
      * So a step scope bean is the same instance for each read/process/write phase and listeners of a given step.
      * Job scope is the same instance for all steps in a job.
+     *
+     * step 에는 job scope 를 붙이자.
+     * step 에 step scope 를 붙이면 오류가 난다. step scope 는 step 보다 하위에 붙이자.
      * */
     @Bean
     @JobScope
@@ -51,7 +55,9 @@ public class SimpleJobConfig002 {
                 }).build();
     }
 
-
+    /**
+     * job
+     */
 //    @Bean
     public Job job() {
         return batchBuilderContainer.getJobBuilderFactory().get("simple-job")
@@ -60,6 +66,9 @@ public class SimpleJobConfig002 {
                 .build();
     }
 
+    /**
+     * job
+     */
 //    @Bean
     public Job jobWithRunIdIncrementer() {
         return batchBuilderContainer.getJobBuilderFactory().get("simple-job-with-incrementer")
@@ -68,6 +77,9 @@ public class SimpleJobConfig002 {
                 .build();
     }
 
+    /**
+     * job
+     */
 //    @Bean
     public Job jobWithCustomIncrementer() {
         return batchBuilderContainer.getJobBuilderFactory().get("simple-job-with-custom-incrementer")
@@ -77,7 +89,6 @@ public class SimpleJobConfig002 {
     }
 
     public static class CustomIncrementer implements JobParametersIncrementer {
-
         @Override
         public JobParameters getNext(JobParameters parameters) {
             return new JobParametersBuilder(parameters)
@@ -86,7 +97,10 @@ public class SimpleJobConfig002 {
         }
     }
 
-//    @Bean
+    /**
+     * job
+     */
+    @Bean
     public Job job2WithJobListener() {
         return batchBuilderContainer.getJobBuilderFactory().get("simple-job-with-job-execution-listener")
                 .start(simpleStep(null))
@@ -105,6 +119,9 @@ public class SimpleJobConfig002 {
                 .build();
     }
 
+    /**
+     * job
+     */
 //    @Bean
     public Job jobWithCustomAnnotatedListener() {
         return batchBuilderContainer.getJobBuilderFactory()

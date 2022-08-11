@@ -27,24 +27,38 @@ import java.util.Date;
  * step/job execution context
  * execution context promotion listener
  * */
-@Configuration
+//@Configuration
 @Slf4j
 public class SimpleJobConfig003 {
 
     @Autowired
     BatchBuilderContainer batchBuilderContainer;
 
+    /**
+     * Job
+     */
 //    @Bean
     public Job jobWithAddUserNameToExecutionContext() {
         return batchBuilderContainer.getJobBuilderFactory().get("simple-job-with-add-execution-context-inc")
                 .start(stepWithAddUserNameToExecutionContext())
+                .next(stepWithCheckExecutionContext())
                 .incrementer(new RunIdIncrementer())
                 .build();
     }
     @Bean
     public Step stepWithAddUserNameToExecutionContext() {
         return batchBuilderContainer.getStepBuilderFactory().get("simple-step-with-add-execution-context")
-                .tasklet(new AddUserNameToExecutionContextTasklet(AddUserNameToExecutionContextTasklet.ADD_LOCATION.STEP))
+                .tasklet(new AddUserNameToExecutionContextTasklet(AddUserNameToExecutionContextTasklet.ADD_LOCATION.JOB))
+                .build();
+    }
+    @Bean
+    public Step stepWithCheckExecutionContext() {
+        return batchBuilderContainer.getStepBuilderFactory().get("simple-step-with-check-execution-context")
+                .tasklet((contribution, chunkContext) -> {
+                    log.debug("job {}", chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().get("user.name"));
+                    log.debug("step {}", chunkContext.getStepContext().getStepExecution().getExecutionContext().get("user.name"));
+                    return RepeatStatus.FINISHED;
+                })
                 .build();
     }
     @Slf4j
@@ -73,7 +87,10 @@ public class SimpleJobConfig003 {
         }
     }
 
-//    @Bean
+    /**
+     * Job
+     */
+    @Bean
     public Job jobWithExecutionContextPromotionListener() {
         return batchBuilderContainer.getJobBuilderFactory().get("simple-job-with-execution-context-promotion-listener")
                 .start(step1())
