@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 
 @Slf4j
-@Component
+//@Component
 public class JpaRepositoryCheckRunner implements ApplicationRunner {
     @Autowired
     BookRepository bookRepository;
